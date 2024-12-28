@@ -62,7 +62,6 @@ namespace Infrastructure.Persistence.Repositories
         {
             var query = _context.Reservas.AsQueryable();
 
-            // Aplicar filtros opcionales
             if (dto.fechaIniReserva.HasValue)
                 query = query.Where(r => r.FechaIniReserva >= dto.fechaIniReserva.Value);
 
@@ -75,18 +74,17 @@ namespace Infrastructure.Persistence.Repositories
             if (dto.espaciosCompartidosId.HasValue)
                 query = query.Where(r => r.EspaciosCompartidosId == dto.espaciosCompartidosId.Value);
 
-            // Realizar el Join con las tablas relacionadas y proyectar el nuevo modelo
             var result = await query
                 .Join(
-                    _context.Clientes, // Entidad Cliente
-                    reserva => reserva.ClienteId, // Clave foránea en Reserva
-                    cliente => cliente.Id, // Clave primaria en Cliente
+                    _context.Clientes,
+                    reserva => reserva.ClienteId,
+                    cliente => cliente.Id,
                     (reserva, cliente) => new { Reserva = reserva, Cliente = cliente }
                 )
                 .Join(
-                    _context.EspacioCompartido, // Entidad EspacioCompartido
-                    reservaCliente => reservaCliente.Reserva.EspaciosCompartidosId, // Clave foránea en Reserva
-                    espacio => espacio.Id, // Clave primaria en EspacioCompartido
+                    _context.EspacioCompartido,
+                    reservaCliente => reservaCliente.Reserva.EspaciosCompartidosId,
+                    espacio => espacio.Id,
                     (reservaCliente, espacio) => new ResponseReservaDTO
                     {
                         Id = reservaCliente.Reserva.Id,
